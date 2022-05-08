@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="com.hyundai.mapper.OrderMemberMapper">
+ 
+ 
+ <select id="getOrderMember" resultType="com.hyundai.domain.OrderMemberVO">
+ 	SELECT MID,
+	       MNAME,
+	       MEMAIL,
+	       REGEXP_REPLACE(MPHONE, '(.{3})(.+)(.{4})', '\1-\2-\3') AS MPHONE,
+	       MADDRESS1,
+	       MADDRESS2
+	  FROM MEMBER
+	 WHERE MID = #{mid}
+ 
+ </select> 
+ 
+ </mapper> 
+ 

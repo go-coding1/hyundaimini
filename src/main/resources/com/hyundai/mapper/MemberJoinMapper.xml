@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+ * @packageName		: src.main.resources
+ * @fileName		: MemberJoinMapper.xml
+ * @author			: 황명하
+ * @description		:회원가입에 필요한 기능들(아이디, 이메일, 전화번호 중복확인, 회원등록)을 위한 SQL문
+ -->
+ 
+<mapper namespace="com.hyundai.mapper.MemberJoinMapper">
+	 
+	 <!-- 아이디 중복 확인 (황명하) -->
+	<select id= "duplid" resultType= "int">
+		SELECT COUNT(*)
+		FROM MEMBER
+		WHERE MID = #{id}
+	</select>
+	<!-- 이메일 중복 확인 (황명하) -->
+	<select id= "duplemail" resultType= "int">
+		SELECT COUNT(*)
+		FROM MEMBER
+		WHERE MEMAIL = #{email}
+	</select>
+	
+	<!-- 전화번호 중복 확인 (황명하) -->
+	<select id= "duplpn" resultType= "int">
+		SELECT COUNT(*)
+		FROM MEMBER
+		WHERE MPHONE = #{pn}
+	</select>
+	
+	<!-- 회원등록 진행 (황명하) -->
+	<insert id="register">
+		insert into member
+		values (#{joinform.id}, #{joinform.passwd}, #{joinform.name}, #{j_email}, #{j_phonenum}, 
+		null, #{joinform.zipcode}, #{joinform.address1}, #{joinform.address2}, #{j_birth},
+		#{j_gender}, null, '간편회원', #{j_tosno}, 1,
+		'ROLE_MEMBER', 1, 1000)
+	</insert>
+	
+	
+</mapper>

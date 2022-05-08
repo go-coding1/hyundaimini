@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="com.hyundai.mapper.OrderMapper">
+ 
+ <insert id="insertOrders" parameterType="com.hyundai.domain.OrdersVO">
+ 	<selectKey keyProperty="oid" order="BEFORE" resultType="Integer">
+ 		select s_orders.nextval from dual
+ 	</selectKey>
+ 	INSERT INTO ORDERS(OID,
+						OADDRESS1,    
+						ORECEIVER,    
+						OPHONE,       
+						OTEL,                  
+						OMEMO,               
+						OEMAIL,              
+						OBEFOREPRICE,
+						OAFTERPRICE,  
+						OSTATUS,      
+						MID,                          
+						OADDRESS2,
+						PMCODE 
+						 	)
+			 	VALUES(#{oid},
+						#{oaddress1},    
+						#{oreceiver} ,   
+						#{ophone}     ,  
+						#{otel, jdbcType=VARCHAR},          
+						#{omemo , jdbcType=VARCHAR}        ,       
+						#{oemail}        ,      
+						#{obeforeprice},
+						#{oafterprice}  ,
+						#{ostatus}      ,
+						#{mid}           ,               
+						#{oaddress2},
+						#{pmcode}
+									 	)
+ </insert>
+ 
+ <insert id="insertOrderItem" parameterType="java.util.List">
+ 	<foreach collection="list" item="item" open ="insert all" close="select * from dual">
+ 		INTO ORDER_ITEM(PSID,
+ 							OID,
+ 							OICOUNT,
+ 							OITOTALPRICE)
+ 					VALUES(#{item.psid},
+ 							#{item.oid},
+ 							#{item.oicount},
+ 							#{item.oitotalprice})	
+ 	</foreach>
+
+ </insert>
+ <resultMap type="com.hyundai.domain.OrderItemVO" id="OrderItemVO">
+	 	<result column="pname" property="pname"></result>
+	 	<result column="oicount" property="oicount"></result>
+	 	<result column="oitotalprice" property="oitotalprice"></result>
+	 	<result column="ostatus" property="ostatus"></result>
+	 	<result column="oid" property="oid"></result>
+	 	<result column="mid" property="mid"></result>
+	 	<result column="psid" property="psid"></result>
+	 </resultMap>
+ <select id="getOrderList" resultMap="OrderItemVO">
+ 	select pc.pname, oi.oicount, oi.oitotalprice, oi.ostatus, o.oid, o.mid
+	from orders o, order_item oi, product_stock ps, product_color prcl, product_common pc
+	where o.oid = oi.oid
+	  and oi.psid = ps.psid
+	  and ps.pcid = prcl.pcid
+	  and prcl.pid = pc.pid
+	  and o.mid = #{mid, jdbcType=VARCHAR}
+	order by odate desc
+ </select>
+ 
+ <select id="getOrderListForAdmin" resultMap="OrderItemVO">
+ 	 select pc.pname, oi.oicount, oi.oitotalprice, oi.ostatus, o.oid, o.mid, ps.psid
+	from orders o, order_item oi, product_stock ps, product_color prcl, product_common pc
+	where o.oid = oi.oid
+	  and oi.psid = ps.psid
+	  and ps.pcid = prcl.pcid
+	  and prcl.pid = pc.pid
+	  and oi.ostatus is null
+     order by odate desc
+ </select>
+ 
+ <update id="updateOrder" parameterType="com.hyundai.domain.OrderItemVO">
+ 	update order_item
+ 	   set ostatus = '배송완료'
+ 	 where psid = #{psid}
+ 	   and oid = #{oid}
+ </update>
+ 
+ </mapper> 
+ 

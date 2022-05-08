@@ -12,7 +12,7 @@
 	<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
 	<property name="driverClassName"
 			value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"></property>
-	<property name="jdbcUrl" value="jdbc:log4jdbc:oracle:thin:@DB202204181218_high?TNS_ADMIN=/Users/ksj/Documents/workspace-sts/Wallet_DB202204181218"></property>
+	<property name="jdbcUrl" value="jdbc:log4jdbc:oracle:thin:@DB202204181218_low?TNS_ADMIN=/Users/ksj/Documents/workspace-sts/Wallet_DB202204181218"></property>
 	<property name="username" value="HYUNDAIMINI"></property>
 	<property name="password" value="Password1234"></property>	
 	</bean>
@@ -25,7 +25,8 @@
 	<bean id="SqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 	<property name="dataSource" ref="dataSource"></property>
 	</bean>
-	<mybatis-spring:scan base-package="org.hyundai.mapper"/>
+	<mybatis-spring:scan base-package="com.hyundai.mapper"/>
 	<context:component-scan base-package="com.hyundai.service"></context:component-scan>
+	<context:component-scan base-package="com.hyundai.utils"></context:component-scan>
 	
 </beans>

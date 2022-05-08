@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+ * @packageName		: src.main.resources.com.mapper 
+ * @fileName		: ReviewMapper.xml
+ * @author			: 정예성 
+ * @description		: 리뷰 관련 데이터 처리를 위한 SQL문
+ -->
+ <mapper namespace="com.hyundai.mapper.ReviewMapper">
+	 
+	 <select id="getReviewList" resultType="com.hyundai.domain.ReviewVO">
+	 	<![CDATA[
+		 	SELECT * 
+		 	FROM (SELECT ROWNUM RN 
+		 		   , RNO
+		 		   , MID
+		 		   , MNAME
+		 		   , PID
+		 		   , PNAME
+		 		   , RCONTENT
+		 		   , RIMAGE
+		 		   , RTHUMIMAGE		 	
+		 		   , TO_CHAR(RDATE, 'YY-MM-DD') RDATE
+		 	      FROM REVIEW
+		 	      WHERE RNO > 0
+		 	      AND PID = #{pId}
+		 	      AND ROWNUM <= #{pageNum} * #{amount})
+		 	WHERE RN > (#{pageNum} -1) * #{amount}
+		 	ORDER BY RDATE DESC
+	 	]]>
+	 </select>
+	 
+	 <select id="readReview" resultType="com.hyundai.domain.ReviewVO">
+	 	SELECT * 
+	 	FROM REVIEW
+	 	WHERE RNO = #{rNo}
+	 </select>
+	 
+	 <select id="getReviewCount" resultType="int">
+		 SELECT COUNT(*)
+		 FROM REVIEW
+		 WHERE PID = #{pId}
+	 </select>
+	 
+	 <delete id="deleteReview">
+	 	DELETE FROM REVIEW WHERE RNO = #{rNo}
+	 </delete>
+	 
+	 <update id="updateReview">
+	 	UPDATE REVIEW SET RCONTENT = #{rContent}, RIMAGE = #{rImage}, RTHUMIMAGE = #{rThumImage}
+	 	WHERE RNO = #{rNo}
+	 </update>
+	 
+	 <insert id="insertReview">
+	 	INSERT INTO REVIEW(RNO, MID, MNAME, PID, PNAME, RCONTENT, RIMAGE, RTHUMIMAGE, RDATE)
+	 	VALUES (S_REVIEW.NEXTVAL, #{mId}, #{mName}, #{pId}, #{pName}, #{rContent}, #{rImage}, #{rThumImage}, SYSDATE)
+	 </insert>
+ </mapper>

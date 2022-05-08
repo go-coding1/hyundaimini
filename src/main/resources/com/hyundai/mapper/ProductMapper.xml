@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+ * @packageName		: src.main.resources.com.mapper 
+ * @fileName		: ProductMapper.xml
+ * @author			: 정예성 
+ * @description		: 상품 관련 데이터 처리를 위한 SQL문
+ -->
+ <mapper namespace="com.hyundai.mapper.ProductMapper">
+	 <resultMap type="com.hyundai.domain.CategoryVO" id="CategoryVO">
+	 	<result column="CATENAME" property="cateName"></result>
+	 	<result column="CATEREFCODE1" property="cateRefCode1"></result>
+	 	<result column="CATEREFCODE2" property="cateRefCode2"></result>
+	 </resultMap>
+	 
+	 <resultMap type="com.hyundai.domain.ProductCategoryVO" id="ProductCategoryVO">
+	 	<result column="CATENO" property="cateNo"></result>
+	 </resultMap>
+	 
+	 <resultMap type="com.hyundai.domain.BrandVO" id="BrandVO">
+	 	<result column="BNAME" property="bName"></result>
+	 </resultMap>
+	 
+	 <resultMap type="com.hyundai.domain.ProductColorVO" id="ProductColorVO">
+	 	<result column="PCIMG1" property="pcImg1"></result>
+	 	<result column="PCIMG2" property="pcImg2"></result>
+	 	<result column="PCIMG3" property="pcImg3"></result>
+	 	<result column="PCCHIPIMG" property="pcChipImg"></result>
+	 	<result column="PCCOLORCODE" property="pcColorCode"></result>
+	 	<result column="PCPRICE" property="pcPrice"></result>
+	 </resultMap>
+	 
+	 <resultMap type="com.hyundai.domain.ProductStockVO" id="ProductStockVO">
+	 	<result column="PSIZE" property="pSize"></result>
+	 	<result column="PSID" property="psId"></result>
+	 </resultMap>
+	 
+	 <resultMap type="com.hyundai.domain.ProductCommonVO" id="ProductCommonVO">
+	 	<result column="PID" property="pId"></result>
+	 	<result column="PNAME" property="pName"></result>
+	 	<result column="PNOTE" property="pNote"></result>
+	 	<result column="BNO" property="bNo"></result>
+	 	<collection property="brandVO" resultMap="BrandVO"></collection>
+	 	<collection property="categoryVO" resultMap="CategoryVO"></collection>
+	 	<collection property="productStockVO" resultMap="ProductStockVO"></collection>
+	 	<collection property="productCategoryVO" resultMap="ProductCategoryVO"></collection>
+	 	<collection property="productColorVO" resultMap="ProductColorVO"></collection>
+	 </resultMap>
+	 
+	 <!-- 대분류별 상품 리스트 출력 -->
+	 <select id="getProductList_1" resultMap="ProductCommonVO">
+	 <![CDATA[
+	  	SELECT * 
+		FROM (SELECT ROWNUM RN 
+		       	     , PCOM.PID
+	           		 , PCOM.PNAME
+	           		 , PCOM.BNO
+	           		 , BR.BNAME
+	           		 , PCATE.CATENO
+	           		 , PCLR.PCIMG1
+	           		 , PCLR.PCIMG2
+	           		 , PCLR.PCCHIPIMG
+	           		 , PCLR.PCCOLORCODE
+	           		 , PCLR.PCPRICE
+	           		 , CATE.CATENAME
+	           		 , CATE.CATEREFCODE1
+	           		 , CATE.CATEREFCODE2
+			 FROM PRODUCT_COMMON PCOM
+			 JOIN PRODUCT_CATEGORY PCATE 
+			 ON PCOM.PID = PCATE.PID
+			 JOIN CATEGORY CATE 
+			 ON PCATE.CATENO = CATE.CATENO
+			 JOIN (SELECT PID 
+                          , PCIMG1
+                          , PCIMG2
+                          , PCCHIPIMG
+                          , LISTAGG(PCCOLORCODE, ',') WITHIN GROUP (ORDER BY PCCOLORCODE) PCCOLORCODE
+                          , PCPRICE
+                   FROM PRODUCT_COLOR
+                   GROUP BY PID, PCIMG1, PCIMG2, PCCHIPIMG, PCPRICE) PCLR
+			 ON PCOM.PID = PCLR.PID
+			 JOIN BRAND BR 
+			 ON PCOM.BNO = BR.BNO 
+			 WHERE CATE.CATEREFCODE1 = #{cateRefCode1}
+			 AND ROWNUM <= #{pageNum} * #{amount}
+		)
+		WHERE RN > (#{pageNum} -1) * #{amount} 
+	  ]]>
+	 </select>
+	 
+	 <!-- 중분류별 상품 리스트 출력 -->
+	 <select id="getProductList_2" resultMap="ProductCommonVO">
+	 <![CDATA[
+	  	SELECT * 
+		FROM (SELECT ROWNUM RN 
+		       	     , PCOM.PID
+	           		 , PCOM.PNAME
+	           		 , PCOM.BNO
+	           		 , BR.BNAME
+	           		 , PCATE.CATENO
+	           		 , PCLR.PCIMG1
+	           		 , PCLR.PCIMG2
+	           		 , PCLR.PCCHIPIMG
+	           		 , PCLR.PCCOLORCODE
+	           		 , PCLR.PCPRICE
+	           		 , CATE.CATENAME
+	           		 , CATE.CATEREFCODE1
+	           		 , CATE.CATEREFCODE2
+			 FROM PRODUCT_COMMON PCOM
+			 JOIN PRODUCT_CATEGORY PCATE 
+			 ON PCOM.PID = PCATE.PID
+			 JOIN CATEGORY CATE 
+			 ON PCATE.CATENO = CATE.CATENO
+			 JOIN (SELECT PID 
+                          , PCIMG1
+                          , PCIMG2
+                          , PCCHIPIMG
+                          , LISTAGG(PCCOLORCODE, ',') WITHIN GROUP (ORDER BY PCCOLORCODE) PCCOLORCODE
+                          , PCPRICE
+                   FROM PRODUCT_COLOR
+                   GROUP BY PID, PCIMG1, PCIMG2, PCCHIPIMG, PCPRICE) PCLR
+			 ON PCOM.PID = PCLR.PID
+			 JOIN BRAND BR 
+			 ON PCOM.BNO = BR.BNO 
+			 WHERE CATE.CATEREFCODE2 = #{cateRefCode2}
+			 AND ROWNUM <= #{pageNum} * #{amount}
+		)
+		WHERE RN > (#{pageNum} -1) * #{amount} 
+	  ]]>
+	 </select>
+	 
+	 <!-- 소분류별 상품 리스트 출력 -->
+	 <select id="getProductList_3" resultMap="ProductCommonVO">
+	 <![CDATA[
+	  	SELECT * 
+		FROM (SELECT ROWNUM RN 
+		       	     , PCOM.PID
+	           		 , PCOM.PNAME
+	           		 , PCOM.BNO
+	           		 , BR.BNAME
+	           		 , PCATE.CATENO
+	           		 , PCLR.PCIMG1
+	           		 , PCLR.PCIMG2
+	           		 , PCLR.PCCHIPIMG
+	           		 , PCLR.PCCOLORCODE
+	           		 , PCLR.PCPRICE
+	           		 , CATE.CATENAME
+	           		 , CATE.CATEREFCODE1
+	           		 , CATE.CATEREFCODE2
+			 FROM PRODUCT_COMMON PCOM
+			 JOIN PRODUCT_CATEGORY PCATE 
+			 ON PCOM.PID = PCATE.PID
+			 JOIN CATEGORY CATE 
+			 ON PCATE.CATENO = CATE.CATENO
+			 JOIN (SELECT PID 
+                          , PCIMG1
+                          , PCIMG2
+                          , PCCHIPIMG
+                          , LISTAGG(PCCOLORCODE, ',') WITHIN GROUP (ORDER BY PCCOLORCODE) PCCOLORCODE
+                          , PCPRICE
+                   FROM PRODUCT_COLOR
+                   GROUP BY PID, PCIMG1, PCIMG2, PCCHIPIMG, PCPRICE) PCLR
+			 ON PCOM.PID = PCLR.PID
+			 JOIN BRAND BR 
+			 ON PCOM.BNO = BR.BNO 
+			 WHERE CATE.CATENO = #{cateNo}
+			 AND ROWNUM <= #{pageNum} * #{amount}
+		)
+		WHERE RN > (#{pageNum} -1) * #{amount} 
+	  ]]>
+	 </select>
+	 <!-- #{pageNum} * #{amount}, (#{pageNum} -1) * #{amount} -->
+	 
+	 <!-- 대분류 기준 상품 전체 개수 --> 	 
+	 <select id="getTotalCount_1" resultType="int">
+		 SELECT COUNT(*)
+		 FROM PRODUCT_COMMON PCOM
+		 JOIN PRODUCT_CATEGORY PCATE 
+		 ON PCOM.PID = PCATE.PID
+		 JOIN CATEGORY CATE 
+	     ON PCATE.CATENO = CATE.CATENO
+		 JOIN (SELECT PID 
+                          , PCIMG1
+                          , PCIMG2
+                          , PCCHIPIMG
+                          , LISTAGG(PCCOLORCODE, ',') WITHIN GROUP (ORDER BY PCCOLORCODE) PCCOLORCODE
+                          , PCPRICE
+                   FROM PRODUCT_COLOR
+                   GROUP BY PID, PCIMG1, PCIMG2, PCCHIPIMG, PCPRICE) PCLR
+		 ON PCOM.PID = PCLR.PID
+		 JOIN BRAND BR 
+		 ON PCOM.BNO = BR.BNO 
+		 WHERE CATE.CATEREFCODE1 = #{cateRefCode1}
+	 </select>
+	 
+	 <!-- 중분류 기준 상품 전체 개수 --> 	 
+	 <select id="getTotalCount_2" resultType="int">
+		 SELECT COUNT(*)
+		 FROM PRODUCT_COMMON PCOM
+		 JOIN PRODUCT_CATEGORY PCATE 
+		 ON PCOM.PID = PCATE.PID
+		 JOIN CATEGORY CATE 
+	     ON PCATE.CATENO = CATE.CATENO
+		 JOIN (SELECT PID 
+                          , PCIMG1
+                          , PCIMG2
+                          , PCCHIPIMG
+                          , LISTAGG(PCCOLORCODE, ',') WITHIN GROUP (ORDER BY PCCOLORCODE) PCCOLORCODE
+                          , PCPRICE
+                   FROM PRODUCT_COLOR
+                   GROUP BY PID, PCIMG1, PCIMG2, PCCHIPIMG, PCPRICE) PCLR
+		 ON PCOM.PID = PCLR.PID
+		 JOIN BRAND BR 
+		 ON PCOM.BNO = BR.BNO 
+		 WHERE CATE.CATEREFCODE2 = #{cateRefCode2}
+	 </select>
+	 
+	 <!-- 소분류 기준 상품 전체 개수 --> 	 
+	 <select id="getTotalCount_3" resultType="int">
+		 SELECT COUNT(*)
+		 FROM PRODUCT_COMMON PCOM
+		 JOIN PRODUCT_CATEGORY PCATE 
+		 ON PCOM.PID = PCATE.PID
+		 JOIN CATEGORY CATE 
+	     ON PCATE.CATENO = CATE.CATENO
+		 JOIN (SELECT PID 
+                          , PCIMG1
+                          , PCIMG2
+                          , PCCHIPIMG
+                          , LISTAGG(PCCOLORCODE, ',') WITHIN GROUP (ORDER BY PCCOLORCODE) PCCOLORCODE
+                          , PCPRICE
+                   FROM PRODUCT_COLOR
+                   GROUP BY PID, PCIMG1, PCIMG2, PCCHIPIMG, PCPRICE) PCLR
+		 ON PCOM.PID = PCLR.PID
+		 JOIN BRAND BR 
+		 ON PCOM.BNO = BR.BNO 
+		 WHERE CATE.CATENO = #{cateNo}
+	 </select>
+	 
+	 <!-- 상품 상세보기 -->
+	 <select id="getProductDetail" resultMap="ProductCommonVO">
+	 	SELECT  PCOM.PID
+	            , PCOM.PNAME
+	           	, PCOM.BNO
+                , PCOM.PNOTE
+	           	, BR.BNAME
+	           	, PCATE.CATENO
+	           	, PCLR.PCIMG1
+	           	, PCLR.PCIMG2
+	           	, PCLR.PCCHIPIMG
+	           	, PCLR.PCCOLORCODE
+	           	, PCLR.PCPRICE
+		FROM PRODUCT_COMMON PCOM
+		JOIN PRODUCT_CATEGORY PCATE 
+		ON PCOM.PID = PCATE.PID
+		JOIN CATEGORY CATE 
+		ON PCATE.CATENO = CATE.CATENO
+		JOIN (SELECT PID 
+                     , PCIMG1
+                     , PCIMG2
+                     , PCCHIPIMG
+                     , LISTAGG(PCCOLORCODE, ',') WITHIN GROUP (ORDER BY PCCOLORCODE) PCCOLORCODE
+                     , PCPRICE
+              FROM PRODUCT_COLOR
+              GROUP BY PID, PCIMG1, PCIMG2, PCCHIPIMG, PCPRICE) PCLR
+		ON PCOM.PID = PCLR.PID
+		JOIN BRAND BR 
+		ON PCOM.BNO = BR.BNO 
+		WHERE PCOM.PID = #{pId}
+	 </select>
+	 
+	 <!-- 상품 사이즈 -->
+	 <select id="getProductSize" resultMap="ProductCommonVO">
+		 SELECT PS.PSID, PS.PSIZE
+		  FROM PRODUCT_COMMON PC JOIN PRODUCT_COLOR PCLR ON (PC.PID = PCLR.PCID)
+		                       JOIN PRODUCT_STOCK PS ON (PCLR.PCID = PS.PCID)
+		 WHERE PC.PID = #{pId}
+		 ORDER BY TO_NUMBER(PSIZE)
+				 
+	 </select>
+	 
+	 <!-- 상품 색상 -->
+	 <select id="getProductColor" resultMap="ProductCommonVO">
+		 SELECT PCLR.PCCOLORCODE
+		 FROM PRODUCT_COLOR PCLR
+		 JOIN PRODUCT_COMMON PC
+		 ON   PC.PID = PCLR.PID
+		 WHERE PC.PID = #{pId}
+	 </select>
+</mapper>

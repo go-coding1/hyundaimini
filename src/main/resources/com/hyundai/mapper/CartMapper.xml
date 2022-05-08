@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="com.hyundai.mapper.CartMapper">
+ 
+ 
+ <select id="getList" resultType="com.hyundai.domain.CartVO">
+ 	select e.bname,-- as 브랜드명,
+	       d.pname as,-- 상품이름,
+	       c.pccolorcode,-- as 상품컬러,
+	       b.psize,-- as 사이즈,
+	       a.pquantity,-- as 장바구니수량,
+	       c.pcprice,-- as 판매가,
+	       c.pcchipimg,-- as 상품사진,
+	       a.mid, -- as 회원_id
+	       a.psid
+	  from cart a , product_stock b, product_color c, product_common d, brand e
+	  where a.psid = b.psid
+	    and b.pcid = c.pcid
+	    and c.pid = d.pid
+	    and d.bno = e.bno
+	    and a.mid = #{pid}
+ </select> 
+ 
+ <insert id="insertCart">
+ 	insert into Cart(mid, psid, pquantity)
+ 	values(#{mid}, #{psid}, #{pquantity})
+ </insert>
+ 
+ <update id="updateCart">
+ 	UPDATE CART
+	   SET PQUANTITY = #{pquantity}
+	 WHERE MID = #{mid}
+	   AND PSID = #{psid}
+ </update>
+ 
+ <delete id="deleteCart" parameterType="java.util.ArrayList">
+ 	DELETE CART
+ 	<where>
+ 	<foreach collection="list" item="item" open="" close="" separator="OR">
+ 		(MID = #{item.mid} AND PSID = #{item.psid})
+ 	</foreach>
+ 	</where>
+ </delete>
+  
+ </mapper> 
+ 
